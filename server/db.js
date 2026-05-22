@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'clinica.db');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'clinica.db');
 
 const db = new Database(DB_PATH);
 
@@ -45,7 +45,7 @@ function inicializarDB() {
     -- Tabla de configuración de la clínica
     CREATE TABLE IF NOT EXISTS configuracion_clinica (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre_clinica TEXT DEFAULT 'Clínica Dental Sonrisa',
+      nombre_clinica TEXT DEFAULT 'Klin',
       direccion TEXT,
       telefono TEXT,
       email TEXT,
@@ -127,7 +127,7 @@ function inicializarDB() {
         (nombre_clinica, direccion, telefono, email, horarios, servicios, sobre_clinica)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(
-      'Clínica Dental Sonrisa',
+      'Klin',
       'Av. Corrientes 1234, Piso 3, Buenos Aires, Argentina',
       '+54 11 4567-8900',
       'info@clinicasonrisa.com.ar',
@@ -219,6 +219,22 @@ function inicializarDB() {
     insertarTodos();
     console.log(`[DB] Catálogo inicial insertado: ${SERVICIOS_INICIALES.length} servicios`);
   }
+
+  // Tabla de contactos (nombres de pacientes)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS contactos (
+      numero_telefono TEXT PRIMARY KEY,
+      nombre TEXT,
+      creado_en DATETIME DEFAULT (datetime('now', 'localtime')),
+      actualizado_en DATETIME DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Migraciones
+  try { db.exec('ALTER TABLE configuracion_clinica ADD COLUMN bot_activo INTEGER DEFAULT 1'); } catch (_) {}
+  try { db.exec('ALTER TABLE contactos ADD COLUMN total_visitas INTEGER DEFAULT 1'); } catch (_) {}
+  try { db.exec('ALTER TABLE contactos ADD COLUMN notas TEXT'); } catch (_) {}
+  try { db.exec('ALTER TABLE contactos ADD COLUMN ultima_actividad DATETIME'); } catch (_) {}
 
   console.log('[DB] Base de datos inicializada correctamente');
 }

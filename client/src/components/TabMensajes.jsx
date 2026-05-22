@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { MessageCircle, User, Bot } from 'lucide-react'
+import { MessageCircle, User, Bot, Trash2 } from 'lucide-react'
+import { toast } from '@/hooks/use-toast'
 
 function formatearFechaHora(fecha) {
   if (!fecha) return ''
@@ -11,10 +12,21 @@ function formatearFechaHora(fecha) {
 }
 
 export default function TabMensajes() {
+  const queryClient = useQueryClient()
+
   const { data: mensajes = [], isLoading } = useQuery({
     queryKey: ['mensajes'],
     queryFn: api.mensajes.listar,
     refetchInterval: 10000,
+  })
+
+  const mutEliminar = useMutation({
+    mutationFn: (numero) => api.mensajes.eliminar(numero),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mensajes'] })
+      toast({ title: 'Conversación eliminada' })
+    },
+    onError: (err) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })
 
   // Agrupar por número de teléfono
@@ -57,12 +69,38 @@ export default function TabMensajes() {
           {/* Header de conversación */}
           <div className="bg-[#063740] text-white px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#a8781a] rounded-full flex items-center justify-center text-sm font-bold">
-                {numero.slice(-2)}
+              <div className="w-8 h-8 bg-[#a8781a] rounded-full flex items-center justify-center text-sm font-bold shrink-0">
+                {(msgs[0]?.nombre_contacto || numero).charAt(0).toUpperCase()}
               </div>
-              <span className="font-medium text-sm">{numero}</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-sm leading-tight">
+                    {msgs[0]?.nombre_contacto || numero}
+                  </p>
+                  {msgs[0]?.total_visitas <= 1
+                    ? <span className="text-xs bg-[#a8781a] px-1.5 py-0.5 rounded-full">Nuevo</span>
+                    : <span className="text-xs bg-teal-700 px-1.5 py-0.5 rounded-full">{msgs[0]?.total_visitas} visitas</span>
+                  }
+                </div>
+                {msgs[0]?.nombre_contacto && (
+                  <p className="text-xs text-teal-300">{numero}</p>
+                )}
+              </div>
             </div>
-            <span className="text-xs text-teal-200">{msgs.length} mensajes</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-teal-200">{msgs.length} mensajes</span>
+              <button
+                onClick={() => {
+                  if (confirm(`¿Eliminar conversación con ${msgs[0]?.nombre_contacto || numero}?`)) {
+                    mutEliminar.mutate(numero)
+                  }
+                }}
+                className="p-1 hover:bg-red-500/30 rounded transition-colors"
+                title="Eliminar conversación"
+              >
+                <Trash2 className="w-4 h-4 text-teal-200 hover:text-white" />
+              </button>
+            </div>
           </div>
 
           {/* Mensajes */}
@@ -80,7 +118,7 @@ export default function TabMensajes() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-xs font-medium text-gray-600">
-                      {m.remitente === 'usuario' ? 'Paciente' : 'Sarah (IA)'}
+                      {m.remitente === 'usuario' ? (msgs[0]?.nombre_contacto || 'Paciente') : 'Sarah (IA)'}
                     </span>
                     <span className="text-xs text-gray-400">{formatearFechaHora(m.recibido_en)}</span>
                   </div>

@@ -1,14 +1,17 @@
-// Servicio de OpenAI — Sarah, la recepcionista virtual de la clínica dental
+// Servicio de IA — Sarah, la recepcionista virtual de la clínica dental
+// Usa Groq (Llama 3) como proveedor gratuito, compatible con el SDK de OpenAI
 
 const OpenAI = require('openai');
 const { db, generarNumeroCotizacion } = require('../db');
 const { calcularHorariosDisponibles } = require('../utils/fechas');
 
-// Instancia lazy para evitar error de inicio cuando no hay API key configurada
 let _openai = null;
 function getOpenAI() {
   if (!_openai) {
-    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    _openai = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1',
+    });
   }
   return _openai;
 }
@@ -99,6 +102,21 @@ const HERRAMIENTAS = [
   {
     type: 'function',
     function: {
+      name: 'registrar_nombre_paciente',
+      description: 'Guarda el nombre del paciente. Llamar apenas el paciente proporcione su nombre.',
+      parameters: {
+        type: 'object',
+        properties: {
+          numero_telefono: { type: 'string' },
+          nombre: { type: 'string', description: 'Nombre completo del paciente' },
+        },
+        required: ['numero_telefono', 'nombre'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'consultar_catalogo',
       description: 'Consulta el catálogo de servicios disponibles con sus precios. Usar SIEMPRE antes de mencionar precios o generar una cotización.',
       parameters: {
@@ -167,6 +185,16 @@ const HERRAMIENTAS = [
 // Implementaciones de las herramientas
 function ejecutarHerramienta(nombre, args, config) {
   switch (nombre) {
+    case 'registrar_nombre_paciente': {
+      const { numero_telefono, nombre } = args;
+      db.prepare(`
+        INSERT INTO contactos (numero_telefono, nombre)
+        VALUES (?, ?)
+        ON CONFLICT(numero_telefono) DO UPDATE SET nombre = ?, actualizado_en = datetime('now', 'localtime')
+      `).run(numero_telefono, nombre, nombre);
+      return { exito: true };
+    }
+
     case 'consultar_disponibilidad': {
       const { fecha } = args;
       const turnos = db.prepare(`
@@ -293,7 +321,7 @@ function ejecutarHerramienta(nombre, args, config) {
 
       // Obtener config de la clínica para el nombre
       const clinicaConfig = db.prepare('SELECT nombre_clinica FROM configuracion_clinica LIMIT 1').get();
-      const nombreClinica = clinicaConfig?.nombre_clinica || 'Clínica Dental';
+      const nombreClinica = clinicaConfig?.nombre_clinica || 'Klin';
 
       // Verificar que todos los servicios existan y estén activos
       const itemsValidos = [];
@@ -340,7 +368,7 @@ function ejecutarHerramienta(nombre, args, config) {
         return cotizacionId;
       });
 
-      crearCotizacion();
+      const cotizacionId = crearCotizacion();
 
       // Generar texto formateado para WhatsApp
       const fechaFormateada = new Date().toLocaleDateString('es-AR', {
@@ -378,6 +406,7 @@ Respondé *ACEPTAR* para confirmar o *RECHAZAR* para cancelar.
 
       return {
         exito: true,
+        cotizacion_id: cotizacionId,
         numero_cotizacion: numeroCotizacion,
         total,
         texto_whatsapp: textoWhatsApp,
@@ -390,36 +419,47 @@ Respondé *ACEPTAR* para confirmar o *RECHAZAR* para cancelar.
 }
 
 async function procesarMensaje(numeroTelefono, mensajeUsuario, historial, config) {
-  const nombreClinica = config?.nombre_clinica || 'Clínica Dental Sonrisa';
+  const nombreClinica = config?.nombre_clinica || 'Klin';
 
-  const systemPrompt = `Sos Sarah, la recepcionista virtual de ${nombreClinica}. Sos amable, profesional y eficiente.
+  // Obtener contexto del paciente
+  const contacto = db.prepare('SELECT * FROM contactos WHERE numero_telefono = ?').get(numeroTelefono);
+  const esPrimerContacto = !contacto;
+  const nombrePaciente = contacto?.nombre || null;
+  const totalVisitas = contacto?.total_visitas || 0;
 
-Tu rol es:
-- Responder preguntas sobre la clínica, servicios y horarios
-- Ayudar a los pacientes a agendar, consultar, cancelar o reprogramar turnos
-- Generar cotizaciones de servicios cuando el paciente lo solicite o cuando pregunte por precios
-- Ser cálida y concisa en tus respuestas
-- Usar español rioplatense (tuteo con "vos", no "usted")
-- Usar emojis moderadamente para ser cercana
+  const contextosPaciente = esPrimerContacto
+    ? 'PACIENTE NUEVO — primera vez que contacta.'
+    : `Paciente conocido: ${nombrePaciente || 'nombre no registrado'} — ${totalVisitas} visita(s) previas.`;
 
-Información de la clínica:
-- Nombre: ${nombreClinica}
-- Dirección principal: ${config?.direccion || 'Consultar por teléfono'}
-- Teléfono: ${config?.telefono || 'Consultar por mensaje'}
-- Email: ${config?.email || 'Consultar por mensaje'}
+  const systemPrompt = `Sos Sarah, asistente de ${nombreClinica}. Profesional, amable y MUY concisa.
+
+ESTILO (obligatorio):
+- Máximo 3-4 líneas por mensaje. Sin párrafos largos.
+- Español rioplatense (vos, no usted)
+- Emojis solo si aportan (máximo 1-2)
+- Una sola pregunta por mensaje
+
+PACIENTE ACTUAL: ${contextosPaciente}
+${nombrePaciente ? `- Llamalo por su nombre: ${nombrePaciente}` : '- No sabés su nombre: presentate brevemente y preguntáselo. Apenas lo diga, llamá registrar_nombre_paciente.'}
+
+CLÍNICA:
+- Dirección: ${config?.direccion || 'Consultar por mensaje'}
+- Tel: ${config?.telefono || 'Consultar por mensaje'}
 - Horarios: ${config?.horarios || 'Lunes a Viernes 9:00-18:00'}
-- Sobre nosotros: ${config?.sobre_clinica || 'Clínica dental de confianza'}
+- Info: ${config?.sobre_clinica || 'Clínica dental de confianza'}
 
-Reglas importantes:
-- Si el paciente quiere un turno: pedí nombre completo, fecha/hora preferida y tipo de consulta
-- Si el paciente pregunta por precios o pide un presupuesto/cotización:
-  1. Usá la herramienta consultar_catalogo para ver los servicios disponibles de la sede que corresponda
-  2. Identificá qué servicios necesita (preguntá si no está claro)
-  3. Confirmá los servicios y precios antes de generar la cotización
-  4. Usá generar_cotizacion_ia para crear y guardar la cotización
-  5. Enviá el resumen formateado que devuelve la herramienta
-- Nunca inventés precios — siempre usá el catálogo con consultar_catalogo
-- Si no podés resolver algo, ofrecé comunicar al paciente por teléfono`;
+SERVICIOS DISPONIBLES (no inventes precios, usá consultar_catalogo):
+${(config?.servicios || 'Restauraciones, Extracciones, Limpieza dental, Blanqueamiento, Prótesis')
+  .split(',').map(s => `• ${s.trim()}`).join('\n')}
+
+REGLAS:
+- Turnos: pedí nombre, fecha y tipo (una pregunta a la vez)
+- Cotización:
+  1. consultar_catalogo para ver precios reales
+  2. Confirmá los servicios
+  3. generar_cotizacion_ia para crear
+  4. Respondé SOLO con el campo texto_whatsapp que devuelve la herramienta, exacto, sin agregar nada
+- Si no podés resolver algo: "Te comunico con el equipo. 🙏"`;
 
   // Construir mensajes con historial
   const mensajes = [
@@ -434,13 +474,15 @@ Reglas importantes:
   let respuestaFinal = '';
   let iteraciones = 0;
   const MAX_ITERACIONES = 10;
+  let textoWhatsappCotizacion = null;
+  let cotizacionIdGenerado = null;
 
   // Bucle de function calling
   while (iteraciones < MAX_ITERACIONES) {
     iteraciones++;
 
     const completion = await getOpenAI().chat.completions.create({
-      model: 'gpt-4o',
+      model: 'llama-3.3-70b-versatile',
       messages: mensajes,
       tools: HERRAMIENTAS,
       tool_choice: 'auto',
@@ -451,7 +493,8 @@ Reglas importantes:
 
     // Si no hay tool calls, es la respuesta final
     if (!mensaje.tool_calls || mensaje.tool_calls.length === 0) {
-      respuestaFinal = mensaje.content || '';
+      // Si se generó una cotización, usar su texto formateado en lugar de la respuesta del modelo
+      respuestaFinal = textoWhatsappCotizacion || mensaje.content || '';
       break;
     }
 
@@ -468,6 +511,11 @@ Reglas importantes:
       console.log(`[OpenAI] Ejecutando herramienta: ${nombre}`, args);
       const resultado = ejecutarHerramienta(nombre, args, config);
 
+      if (nombre === 'generar_cotizacion_ia' && resultado.exito && resultado.texto_whatsapp) {
+        textoWhatsappCotizacion = resultado.texto_whatsapp;
+        cotizacionIdGenerado = resultado.cotizacion_id;
+      }
+
       mensajes.push({
         role: 'tool',
         tool_call_id: toolCall.id,
@@ -481,7 +529,7 @@ Reglas importantes:
   }
 
   console.log(`[OpenAI] Respuesta generada para ${numeroTelefono} en ${iteraciones} iteraciones`);
-  return respuestaFinal;
+  return { respuesta: respuestaFinal, cotizacionId: cotizacionIdGenerado };
 }
 
 module.exports = { procesarMensaje };

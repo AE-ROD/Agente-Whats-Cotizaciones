@@ -11,6 +11,8 @@ router.get('/', (req, res) => {
 
     let query = `
       SELECT c.*,
+        co.nombre as nombre_contacto,
+        co.total_visitas,
         (SELECT json_group_array(json_object(
           'id', i.id,
           'nombre_servicio', i.nombre_servicio,
@@ -20,6 +22,7 @@ router.get('/', (req, res) => {
           'subtotal', i.subtotal
         )) FROM items_cotizacion i WHERE i.cotizacion_id = c.id) as items
       FROM cotizaciones c
+      LEFT JOIN contactos co ON c.numero_telefono = co.numero_telefono
       WHERE 1=1
     `;
     const params = [];
@@ -35,8 +38,8 @@ router.get('/', (req, res) => {
     }
 
     if (buscar) {
-      query += ` AND (c.nombre_paciente LIKE ? OR c.numero_cotizacion LIKE ?)`;
-      params.push(`%${buscar}%`, `%${buscar}%`);
+      query += ` AND (c.nombre_paciente LIKE ? OR c.numero_cotizacion LIKE ? OR co.nombre LIKE ?)`;
+      params.push(`%${buscar}%`, `%${buscar}%`, `%${buscar}%`);
     }
 
     query += ` ORDER BY c.creado_en DESC`;
@@ -163,6 +166,24 @@ router.patch('/:id/estado', (req, res) => {
   } catch (error) {
     console.error('[Cotizaciones] Error al actualizar estado:', error);
     res.status(500).json({ error: 'Error al actualizar estado', detalle: error.message });
+  }
+});
+
+// DELETE /api/cotizaciones/:id — Eliminar cotización
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const cotizacion = db.prepare('SELECT id, numero_cotizacion FROM cotizaciones WHERE id = ?').get(id);
+    if (!cotizacion) return res.status(404).json({ error: 'Cotización no encontrada' });
+
+    db.prepare('DELETE FROM items_cotizacion WHERE cotizacion_id = ?').run(id);
+    db.prepare('DELETE FROM cotizaciones WHERE id = ?').run(id);
+
+    console.log(`[Cotizaciones] Cotización ${cotizacion.numero_cotizacion} eliminada`);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[Cotizaciones] Error al eliminar:', error);
+    res.status(500).json({ error: 'Error al eliminar cotización', detalle: error.message });
   }
 });
 

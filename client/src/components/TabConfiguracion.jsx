@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
-import { Save, Settings, Copy, Check, Edit2, Power } from 'lucide-react'
+import { Save, Settings, Copy, Check, Edit2, Wifi, WifiOff, Bot } from 'lucide-react'
 
 export default function TabConfiguracion() {
   const queryClient = useQueryClient()
@@ -54,6 +54,29 @@ export default function TabConfiguracion() {
     })
   }
 
+  // Estado del agente WhatsApp (polling cada 3s)
+  const { data: waEstado } = useQuery({
+    queryKey: ['whatsapp-estado'],
+    queryFn: api.whatsapp.estado,
+    refetchInterval: 3000,
+  })
+
+  const { data: waQR } = useQuery({
+    queryKey: ['whatsapp-qr'],
+    queryFn: api.whatsapp.qr,
+    refetchInterval: waEstado?.conectado ? false : 3000,
+    enabled: !waEstado?.conectado,
+  })
+
+  const mutacionBot = useMutation({
+    mutationFn: (activo) => api.whatsapp.toggleBot(activo),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['whatsapp-estado'] })
+      toast({ title: data.bot_activo ? '🤖 Agente activado' : '⏸ Agente pausado' })
+    },
+    onError: (err) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+
   // Agrupar catálogo por categoría
   const catalogoPorCategoria = {}
   for (const s of catalogo) {
@@ -72,6 +95,76 @@ export default function TabConfiguracion() {
 
   return (
     <div className="space-y-6">
+
+      {/* Panel del Agente WhatsApp */}
+      <div className="bg-white rounded-lg border shadow-sm p-6">
+        <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Bot className="w-5 h-5 text-[#063740]" /> Agente WhatsApp
+        </h2>
+
+        {/* Estado de conexión */}
+        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 mb-4">
+          <div className="flex items-center gap-3">
+            {waEstado?.conectado
+              ? <Wifi className="w-5 h-5 text-green-500" />
+              : <WifiOff className="w-5 h-5 text-gray-400" />
+            }
+            <div>
+              <p className="font-medium text-sm text-gray-800">
+                {waEstado?.conectado ? 'WhatsApp conectado' : waEstado?.estado === 'esperando_qr' ? 'Esperando escaneo de QR' : 'Desconectado'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {waEstado?.conectado ? 'El agente puede enviar y recibir mensajes' : 'Escaneá el QR para conectar'}
+              </p>
+            </div>
+          </div>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+            waEstado?.conectado ? 'bg-green-100 text-green-700' :
+            waEstado?.estado === 'esperando_qr' ? 'bg-yellow-100 text-yellow-700' :
+            'bg-gray-100 text-gray-500'
+          }`}>
+            {waEstado?.conectado ? 'Conectado' : waEstado?.estado === 'esperando_qr' ? 'Aguardando QR' : 'Offline'}
+          </span>
+        </div>
+
+        {/* QR para escanear */}
+        {!waEstado?.conectado && waQR?.qr && (
+          <div className="flex flex-col items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-lg mb-4">
+            <p className="text-sm text-gray-600 text-center">
+              Abrí WhatsApp en tu celular → <strong>Dispositivos vinculados</strong> → <strong>Vincular un dispositivo</strong> → escaneá este QR
+            </p>
+            <img src={waQR.qr} alt="QR WhatsApp" className="w-52 h-52 rounded-lg shadow" />
+            <p className="text-xs text-gray-400">El QR se actualiza automáticamente cada 15 segundos</p>
+          </div>
+        )}
+
+        {!waEstado?.conectado && !waQR?.qr && (
+          <div className="flex items-center justify-center gap-2 py-4 text-sm text-gray-400">
+            <div className="animate-spin w-4 h-4 border-2 border-[#063740] border-t-transparent rounded-full" />
+            Iniciando WhatsApp...
+          </div>
+        )}
+
+        {/* Toggle bot activo/inactivo */}
+        {waEstado?.conectado && (
+          <div className="flex items-center justify-between p-4 rounded-lg border">
+            <div>
+              <p className="font-medium text-sm text-gray-800">Respuestas automáticas</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {waEstado?.bot_activo ? 'Sarah está respondiendo mensajes automáticamente' : 'El agente está pausado — respondé vos manualmente'}
+              </p>
+            </div>
+            <button
+              onClick={() => mutacionBot.mutate(!waEstado?.bot_activo)}
+              disabled={mutacionBot.isPending}
+              className={`w-12 h-6 rounded-full transition-colors relative ${waEstado?.bot_activo ? 'bg-[#063740]' : 'bg-gray-300'}`}
+            >
+              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${waEstado?.bot_activo ? 'translate-x-7' : 'translate-x-1'}`} />
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Config clínica */}
       <div className="bg-white rounded-lg border shadow-sm p-6">
         <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -124,20 +217,6 @@ export default function TabConfiguracion() {
               rows={3}
             />
           </div>
-        </div>
-
-        {/* URL del webhook */}
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <Label className="text-xs text-gray-500 uppercase tracking-wider">URL del Webhook (Twilio)</Label>
-          <div className="flex items-center gap-2 mt-1">
-            <code className="flex-1 text-sm bg-white border rounded px-3 py-2 text-gray-700 font-mono text-xs overflow-hidden overflow-ellipsis">
-              {config?.webhook_url || `${window.location.origin.replace(':5173', ':3001')}/api/webhook/whatsapp`}
-            </code>
-            <Button variant="outline" size="sm" onClick={copiarWebhook}>
-              {copiado ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-            </Button>
-          </div>
-          <p className="text-xs text-gray-400 mt-1">Configurá esta URL en tu consola de Twilio como webhook de WhatsApp</p>
         </div>
 
         <div className="mt-4 flex justify-end">

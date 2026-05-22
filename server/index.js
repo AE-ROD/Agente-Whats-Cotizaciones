@@ -15,18 +15,18 @@ app.use(cors({
   credentials: true,
 }));
 
-// Parser para Twilio (x-www-form-urlencoded) y JSON
-app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Rutas de la API
-const webhookRouter = require('./routes/webhook');
 const mensajesRouter = require('./routes/mensajes');
 const turnosRouter = require('./routes/turnos');
 const cotizacionesRouter = require('./routes/cotizaciones');
 const configuracionRouter = require('./routes/configuracion');
+const whatsappRouter = require('./routes/whatsapp');
+const contactosRouter = require('./routes/contactos');
 
-app.use('/api/webhook', webhookRouter);
+app.use('/api/whatsapp', whatsappRouter);
+app.use('/api/contactos', contactosRouter);
 app.use('/api/mensajes', mensajesRouter);
 app.use('/api/turnos', turnosRouter);
 app.use('/api/cotizaciones', cotizacionesRouter);
@@ -39,11 +39,9 @@ app.use('/api/configuracion', configuracionRouter);
 
 // Ruta de estado de la API
 app.get('/api/status', (req, res) => {
-  const urlPublica = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
   res.json({
     estado: 'activo',
     version: '1.0.0',
-    webhook_url: `${urlPublica}/api/webhook/whatsapp`,
     timestamp: new Date().toISOString(),
   });
 });
@@ -63,6 +61,9 @@ inicializarDB();
 app.listen(PORT, () => {
   const urlPublica = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
   console.log(`[Servidor] Corriendo en ${urlPublica}`);
-  console.log(`[Servidor] Webhook URL: ${urlPublica}/api/webhook/whatsapp`);
   console.log(`[Servidor] Dashboard: http://localhost:${PORT}`);
+
+  // Iniciar cliente de WhatsApp en background
+  const { iniciar } = require('./services/whatsapp');
+  iniciar();
 });

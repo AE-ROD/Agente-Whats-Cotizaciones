@@ -7,8 +7,8 @@ export default function Landing() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#a8781a] rounded-full flex items-center justify-center text-white font-bold text-sm">D</div>
-          <span className="font-semibold text-lg">Clínica Dental Sonrisa</span>
+          <div className="w-8 h-8 bg-[#a8781a] rounded-full flex items-center justify-center text-white font-bold text-sm">K</div>
+          <span className="font-semibold text-lg">Klin</span>
         </div>
         <Link
           to="/dashboard"
@@ -55,7 +55,7 @@ export default function Landing() {
           <FeatureCard
             icon={<MessageCircle className="w-8 h-8" />}
             titulo="WhatsApp Integrado"
-            descripcion="Recibí y respondé mensajes automáticamente via Twilio. Sarah atiende a tus pacientes 24/7."
+            descripcion="Recibí y respondé mensajes automáticamente via WhatsApp Cloud API. Sarah atiende a tus pacientes 24/7."
           />
           <FeatureCard
             icon={<Calendar className="w-8 h-8" />}
@@ -89,9 +89,9 @@ export default function Landing() {
       <footer className="border-t border-white/10 py-8 text-center text-slate-400 text-sm">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Phone className="w-4 h-4" />
-          <span>Sistema de gestión dental — Powered by OpenAI GPT-4o + Twilio WhatsApp</span>
+          <span>Sistema de gestión dental — Powered by OpenAI GPT-4o + WhatsApp Cloud API</span>
         </div>
-        <p>© 2026 Clínica Dental Sonrisa. Todos los derechos reservados.</p>
+        <p>© 2026 Klin. Todos los derechos reservados.</p>
       </footer>
     </div>
   )

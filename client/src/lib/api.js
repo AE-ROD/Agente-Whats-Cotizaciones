@@ -21,6 +21,7 @@ async function fetchApi(ruta, opciones = {}) {
 export const api = {
   mensajes: {
     listar: () => fetchApi('/mensajes'),
+    eliminar: (numero) => fetchApi(`/mensajes/${encodeURIComponent(numero)}`, { method: 'DELETE' }),
   },
 
   turnos: {
@@ -41,6 +42,7 @@ export const api = {
     crear: (datos) => fetchApi('/cotizaciones', { method: 'POST', body: JSON.stringify(datos) }),
     actualizarEstado: (id, estado) =>
       fetchApi(`/cotizaciones/${id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado }) }),
+    eliminar: (id) => fetchApi(`/cotizaciones/${id}`, { method: 'DELETE' }),
     urlHtml: (id) => `${BASE_URL}/cotizaciones/${id}/html`,
   },
 
@@ -58,5 +60,21 @@ export const api = {
   configuracion: {
     obtener: () => fetchApi('/configuracion'),
     actualizar: (datos) => fetchApi('/configuracion', { method: 'PUT', body: JSON.stringify(datos) }),
+  },
+
+  contactos: {
+    listar: (params = {}) => {
+      const query = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v))).toString()
+      return fetchApi(`/contactos${query ? `?${query}` : ''}`)
+    },
+    obtener: (numero) => fetchApi(`/contactos/${encodeURIComponent(numero)}`),
+    actualizar: (numero, datos) => fetchApi(`/contactos/${encodeURIComponent(numero)}`, { method: 'PATCH', body: JSON.stringify(datos) }),
+    eliminar: (numero) => fetchApi(`/contactos/${encodeURIComponent(numero)}`, { method: 'DELETE' }),
+  },
+
+  whatsapp: {
+    estado: () => fetchApi('/whatsapp/estado'),
+    qr: () => fetchApi('/whatsapp/qr'),
+    toggleBot: (activo) => fetchApi('/whatsapp/bot', { method: 'PUT', body: JSON.stringify({ activo }) }),
   },
 }

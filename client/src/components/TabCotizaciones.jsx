@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import { FileText, Plus, Eye, MessageCircle, Printer, Bot, Search, DollarSign } from 'lucide-react'
+import { FileText, Plus, Eye, MessageCircle, Printer, Bot, Search, DollarSign, Trash2, User } from 'lucide-react'
 import VisorCotizacion from './VisorCotizacion'
 import FormularioCotizacion from './FormularioCotizacion'
 
@@ -49,6 +49,15 @@ export default function TabCotizaciones() {
       toast({ title: 'Estado actualizado' })
     },
     onError: (err) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
+  })
+
+  const mutEliminar = useMutation({
+    mutationFn: (id) => api.cotizaciones.eliminar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cotizaciones'] })
+      toast({ title: 'Cotización eliminada' })
+    },
+    onError: (err) => toast({ title: 'Error al eliminar', description: err.message, variant: 'destructive' }),
   })
 
   const stats = {
@@ -168,14 +177,25 @@ export default function TabCotizaciones() {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                       <span className="font-medium text-gray-800">{cot.nombre_paciente}</span>
-                      <span className="text-gray-400">{cot.numero_telefono}</span>
+                      {cot.nombre_contacto && cot.nombre_contacto !== cot.nombre_paciente && (
+                        <span className="text-xs text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded">
+                          Registrado como: {cot.nombre_contacto}
+                        </span>
+                      )}
+                      <span className="text-gray-400 text-xs">{cot.numero_telefono}</span>
                     </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mt-1">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mt-1">
                       <span>{cot.sede === 'principal' ? 'Sede Principal' : 'Sede Secundaria'}</span>
                       <span>{formatearFecha(cot.creado_en)}</span>
                       {cot.validez_dias && <span>{cot.validez_dias} días validez</span>}
+                      {cot.total_visitas > 0 && (
+                        <span className="flex items-center gap-1 text-[#063740]">
+                          <User className="w-3 h-3" />
+                          {cot.total_visitas === 1 ? 'Paciente nuevo' : `${cot.total_visitas} visitas`}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -231,6 +251,20 @@ export default function TabCotizaciones() {
                           <SelectItem value="rechazada">Rechazada</SelectItem>
                         </SelectContent>
                       </Select>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-red-400 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => {
+                          if (confirm(`¿Eliminar cotización ${cot.numero_cotizacion}?`)) {
+                            mutEliminar.mutate(cot.id)
+                          }
+                        }}
+                        title="Eliminar cotización"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </div>

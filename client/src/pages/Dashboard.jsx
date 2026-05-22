@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { MessageCircle, Calendar, FileText, Settings, Home } from 'lucide-react'
+import { MessageCircle, Calendar, FileText, Settings, Home, Users } from 'lucide-react'
 import TabMensajes from '@/components/TabMensajes'
 import TabTurnos from '@/components/TabTurnos'
 import TabCotizaciones from '@/components/TabCotizaciones'
 import TabConfiguracion from '@/components/TabConfiguracion'
+import TabContactos from '@/components/TabContactos'
 
 export default function Dashboard() {
   return (
@@ -12,9 +13,9 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-[#063740] text-white px-6 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#a8781a] rounded-full flex items-center justify-center font-bold text-sm">D</div>
+          <div className="w-9 h-9 bg-[#a8781a] rounded-full flex items-center justify-center font-bold text-sm">K</div>
           <div>
-            <h1 className="font-bold text-lg leading-tight">Clínica Dental Sonrisa</h1>
+            <h1 className="font-bold text-lg leading-tight">Klin</h1>
             <p className="text-xs text-teal-200">Panel de administración</p>
           </div>
         </div>
@@ -46,6 +47,12 @@ export default function Dashboard() {
               <FileText className="w-4 h-4" /> Cotizaciones
             </TabsTrigger>
             <TabsTrigger
+              value="contactos"
+              className="flex items-center gap-2 data-[state=active]:bg-[#063740] data-[state=active]:text-white px-4 py-2"
+            >
+              <Users className="w-4 h-4" /> Contactos
+            </TabsTrigger>
+            <TabsTrigger
               value="configuracion"
               className="flex items-center gap-2 data-[state=active]:bg-[#063740] data-[state=active]:text-white px-4 py-2"
             >
@@ -56,6 +63,7 @@ export default function Dashboard() {
           <TabsContent value="mensajes"><TabMensajes /></TabsContent>
           <TabsContent value="turnos"><TabTurnos /></TabsContent>
           <TabsContent value="cotizaciones"><TabCotizaciones /></TabsContent>
+          <TabsContent value="contactos"><TabContactos /></TabsContent>
           <TabsContent value="configuracion"><TabConfiguracion /></TabsContent>
         </Tabs>
       </div>

@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { Calendar, Clock, User, Phone, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Calendar, Clock, User, Phone, Plus, X } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 function formatearFecha(fecha) {
   if (!fecha) return ''
@@ -20,8 +23,12 @@ const ESTADOS_COLORES = {
   completado: 'bg-blue-100 text-blue-700 border-blue-200',
 }
 
+const FORM_INICIAL = { nombre_paciente: '', numero_telefono: '', fecha_turno: '', tipo_turno: '', notas: '' }
+
 export default function TabTurnos() {
   const [filtroEstado, setFiltroEstado] = useState('todos')
+  const [modalAbierto, setModalAbierto] = useState(false)
+  const [form, setForm] = useState(FORM_INICIAL)
   const queryClient = useQueryClient()
 
   const { data: turnos = [], isLoading } = useQuery({
@@ -34,10 +41,29 @@ export default function TabTurnos() {
     mutationFn: ({ id, estado }) => api.turnos.actualizar(id, { estado }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos'] })
-      toast({ title: 'Turno actualizado', description: 'El estado del turno fue modificado.' })
+      toast({ title: 'Turno actualizado' })
     },
     onError: (err) => toast({ title: 'Error', description: err.message, variant: 'destructive' }),
   })
+
+  const mutCrear = useMutation({
+    mutationFn: (datos) => api.turnos.crear(datos),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos'] })
+      toast({ title: 'Turno creado correctamente' })
+      setModalAbierto(false)
+      setForm(FORM_INICIAL)
+    },
+    onError: (err) => toast({ title: 'Error al crear turno', description: err.message, variant: 'destructive' }),
+  })
+
+  const handleCrear = () => {
+    if (!form.nombre_paciente || !form.fecha_turno || !form.tipo_turno) {
+      toast({ title: 'Completá nombre, fecha y tipo de turno', variant: 'destructive' })
+      return
+    }
+    mutCrear.mutate(form)
+  }
 
   const turnosFiltrados = filtroEstado === 'todos'
     ? turnos
@@ -61,6 +87,49 @@ export default function TabTurnos() {
 
   return (
     <div className="space-y-4">
+
+      {/* Modal nuevo turno */}
+      {modalAbierto && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-800 text-lg">Nuevo Turno</h3>
+              <button onClick={() => { setModalAbierto(false); setForm(FORM_INICIAL) }}>
+                <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <Label>Nombre del paciente *</Label>
+                <Input value={form.nombre_paciente} onChange={e => setForm(f => ({ ...f, nombre_paciente: e.target.value }))} placeholder="Nombre completo" />
+              </div>
+              <div>
+                <Label>Teléfono</Label>
+                <Input value={form.numero_telefono} onChange={e => setForm(f => ({ ...f, numero_telefono: e.target.value }))} placeholder="+54 9 11 ..." />
+              </div>
+              <div>
+                <Label>Fecha y hora *</Label>
+                <Input type="datetime-local" value={form.fecha_turno} onChange={e => setForm(f => ({ ...f, fecha_turno: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Tipo de consulta *</Label>
+                <Input value={form.tipo_turno} onChange={e => setForm(f => ({ ...f, tipo_turno: e.target.value }))} placeholder="Ej: Limpieza, Extracción..." />
+              </div>
+              <div>
+                <Label>Notas</Label>
+                <Input value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} placeholder="Opcional" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5 justify-end">
+              <Button variant="outline" onClick={() => { setModalAbierto(false); setForm(FORM_INICIAL) }}>Cancelar</Button>
+              <Button onClick={handleCrear} disabled={mutCrear.isPending} className="bg-[#063740] hover:bg-[#063740]/90">
+                {mutCrear.isPending ? 'Guardando...' : 'Guardar turno'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Total" valor={stats.total} color="text-gray-700" />
@@ -69,8 +138,12 @@ export default function TabTurnos() {
         <StatCard label="Cancelados" valor={stats.cancelados} color="text-red-600" />
       </div>
 
-      {/* Filtro */}
+      {/* Filtro + botón nuevo */}
       <div className="flex items-center gap-3">
+        <Button onClick={() => setModalAbierto(true)} className="bg-[#063740] hover:bg-[#063740]/90 flex items-center gap-1.5">
+          <Plus className="w-4 h-4" /> Nuevo turno
+        </Button>
+        <span className="text-sm text-gray-400">|</span>
         <span className="text-sm text-gray-500">Filtrar:</span>
         <Select value={filtroEstado} onValueChange={setFiltroEstado}>
           <SelectTrigger className="w-40">

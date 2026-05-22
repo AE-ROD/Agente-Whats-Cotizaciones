@@ -1,7 +1,7 @@
 // Genera el HTML completo y autocontenido del documento cotización para impresión
 
 function generarHtmlCotizacion(cotizacion, items, config) {
-  const nombreClinica = config?.nombre_clinica || 'Clínica Dental Sonrisa';
+  const nombreClinica = config?.nombre_clinica || 'Klin';
   const direccion = config?.direccion || '';
   const telefono = config?.telefono || '';
   const email = config?.email || '';

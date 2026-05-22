@@ -80,7 +80,7 @@ export default function VisorCotizacion({ cotizacionId, abierto, onCerrar }) {
             <div className="bg-[#063740] text-white p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-xl font-bold">Clínica Dental Sonrisa</h2>
+                  <h2 className="text-xl font-bold">Klin</h2>
                   <p className="text-teal-200 text-sm mt-0.5">Odontología de confianza</p>
                 </div>
                 <div className="text-right">
