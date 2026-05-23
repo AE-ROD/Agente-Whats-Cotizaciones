@@ -62,6 +62,17 @@ export const api = {
     actualizar: (datos) => fetchApi('/configuracion', { method: 'PUT', body: JSON.stringify(datos) }),
   },
 
+  stats: {
+    obtener: () => fetchApi('/stats'),
+  },
+
+  recordatorios: {
+    listar: () => fetchApi('/recordatorios'),
+    crear: (datos) => fetchApi('/recordatorios', { method: 'POST', body: JSON.stringify(datos) }),
+    actualizar: (id, datos) => fetchApi(`/recordatorios/${id}`, { method: 'PATCH', body: JSON.stringify(datos) }),
+    eliminar: (id) => fetchApi(`/recordatorios/${id}`, { method: 'DELETE' }),
+  },
+
   contactos: {
     listar: (params = {}) => {
       const query = new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([, v]) => v))).toString()

@@ -220,6 +220,33 @@ function inicializarDB() {
     console.log(`[DB] Catálogo inicial insertado: ${SERVICIOS_INICIALES.length} servicios`);
   }
 
+  // Tabla de recordatorios
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS recordatorios (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      titulo TEXT NOT NULL,
+      descripcion TEXT,
+      tipo TEXT DEFAULT 'pendiente' CHECK(tipo IN ('pendiente', 'idea', 'recomendacion')),
+      completado INTEGER DEFAULT 0,
+      creado_en DATETIME DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Seed de recordatorios si está vacío
+  const recExisten = db.prepare('SELECT id FROM recordatorios LIMIT 1').get();
+  if (!recExisten) {
+    const ins = db.prepare('INSERT INTO recordatorios (titulo, descripcion, tipo) VALUES (?, ?, ?)');
+    const seed = db.transaction(() => {
+      ins.run('Publicar foto del equipo', 'Subir una foto del equipo a Instagram y Facebook para generar confianza.', 'idea');
+      ins.run('Post sobre limpieza dental', 'Crear contenido educativo sobre la importancia de la limpieza profesional.', 'idea');
+      ins.run('Historias de WhatsApp Status', 'Publicar la promoción del mes en el estado de WhatsApp.', 'recomendacion');
+      ins.run('Solicitar reseñas a pacientes', 'Pedirle a los últimos 5 pacientes satisfechos que dejen una reseña en Google.', 'recomendacion');
+      ins.run('Seguimiento a pacientes sin visita', 'Contactar pacientes con más de 6 meses sin visita para agendar control.', 'pendiente');
+      ins.run('Actualizar catálogo de precios', 'Revisar y actualizar los precios del catálogo de servicios.', 'pendiente');
+    });
+    seed();
+  }
+
   // Tabla de contactos (nombres de pacientes)
   db.exec(`
     CREATE TABLE IF NOT EXISTS contactos (

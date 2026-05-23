@@ -87,7 +87,7 @@ export default function TabConfiguracion() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-48 text-gray-500">
-        <div className="animate-spin w-6 h-6 border-2 border-[#063740] border-t-transparent rounded-full mr-2" />
+        <div className="animate-spin w-6 h-6 border-2 border-[#c9994a] border-t-transparent rounded-full mr-2" />
         Cargando configuración...
       </div>
     )
@@ -140,24 +140,24 @@ export default function TabConfiguracion() {
 
         {!waEstado?.conectado && !waQR?.qr && (
           <div className="flex items-center justify-center gap-2 py-4 text-sm text-gray-400">
-            <div className="animate-spin w-4 h-4 border-2 border-[#063740] border-t-transparent rounded-full" />
+            <div className="animate-spin w-4 h-4 border-2 border-[#c9994a] border-t-transparent rounded-full" />
             Iniciando WhatsApp...
           </div>
         )}
 
         {/* Toggle bot activo/inactivo */}
         {waEstado?.conectado && (
-          <div className="flex items-center justify-between p-4 rounded-lg border">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border">
+            <div className="flex-1 min-w-0">
               <p className="font-medium text-sm text-gray-800">Respuestas automáticas</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                {waEstado?.bot_activo ? 'Sarah está respondiendo mensajes automáticamente' : 'El agente está pausado — respondé vos manualmente'}
+                {waEstado?.bot_activo ? 'Sarah responde mensajes automáticamente' : 'Agente pausado — respondé manualmente'}
               </p>
             </div>
             <button
               onClick={() => mutacionBot.mutate(!waEstado?.bot_activo)}
               disabled={mutacionBot.isPending}
-              className={`w-12 h-6 rounded-full transition-colors relative ${waEstado?.bot_activo ? 'bg-[#063740]' : 'bg-gray-300'}`}
+              className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${waEstado?.bot_activo ? 'bg-indigo-600' : 'bg-gray-300'}`}
             >
               <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${waEstado?.bot_activo ? 'translate-x-7' : 'translate-x-1'}`} />
             </button>

@@ -23,10 +23,14 @@ const turnosRouter = require('./routes/turnos');
 const cotizacionesRouter = require('./routes/cotizaciones');
 const configuracionRouter = require('./routes/configuracion');
 const whatsappRouter = require('./routes/whatsapp');
-const contactosRouter = require('./routes/contactos');
+const contactosRouter     = require('./routes/contactos');
+const statsRouter         = require('./routes/stats');
+const recordatoriosRouter = require('./routes/recordatorios');
 
-app.use('/api/whatsapp', whatsappRouter);
-app.use('/api/contactos', contactosRouter);
+app.use('/api/whatsapp',      whatsappRouter);
+app.use('/api/contactos',     contactosRouter);
+app.use('/api/stats',         statsRouter);
+app.use('/api/recordatorios', recordatoriosRouter);
 app.use('/api/mensajes', mensajesRouter);
 app.use('/api/turnos', turnosRouter);
 app.use('/api/cotizaciones', cotizacionesRouter);
