@@ -1,4 +1,4 @@
-app = "klin-dental"
+app = "franyelis-dashboard"
 primary_region = "gru"
 
 [build]
