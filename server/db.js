@@ -262,6 +262,7 @@ function inicializarDB() {
   try { db.exec('ALTER TABLE contactos ADD COLUMN total_visitas INTEGER DEFAULT 1'); } catch (_) {}
   try { db.exec('ALTER TABLE contactos ADD COLUMN notas TEXT'); } catch (_) {}
   try { db.exec('ALTER TABLE contactos ADD COLUMN ultima_actividad DATETIME'); } catch (_) {}
+  try { db.exec('ALTER TABLE contactos ADD COLUMN es_admin INTEGER NOT NULL DEFAULT 0'); } catch (_) {}
 
   console.log('[DB] Base de datos inicializada correctamente');
 }

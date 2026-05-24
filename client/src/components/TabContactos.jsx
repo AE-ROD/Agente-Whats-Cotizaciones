@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { usePaletaCtx } from '@/pages/Dashboard'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
 import {
   Users, Search, Phone, MessageCircle, Calendar, FileText,
-  DollarSign, X, Edit2, Check, Trash2, ChevronDown, ChevronUp,
+  DollarSign, X, Edit2, Check, Trash2, ChevronDown, ChevronUp, Shield,
 } from 'lucide-react'
 
 function formatearFecha(fecha) {
@@ -15,6 +16,7 @@ function formatearFecha(fecha) {
 }
 
 export default function TabContactos() {
+  const paleta = usePaletaCtx()
   const [busqueda, setBusqueda] = useState('')
   const [expandido, setExpandido] = useState(null)
   const queryClient = useQueryClient()
@@ -41,15 +43,17 @@ export default function TabContactos() {
     total:       contactos.length,
     nuevos:      contactos.filter(c => c.total_visitas <= 1).length,
     recurrentes: contactos.filter(c => c.total_visitas > 1).length,
+    admins:      contactos.filter(c => c.es_admin).length,
   }
 
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard label="Total"       valor={stats.total}       color="text-gray-700" />
-        <StatCard label="Nuevos"      valor={stats.nuevos}      color="text-amber-600" />
-        <StatCard label="Recurrentes" valor={stats.recurrentes} color="text-[#c9994a]" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard label="Total"       valor={stats.total}       color="#64748B" />
+        <StatCard label="Nuevos"      valor={stats.nuevos}      color="#D97706" />
+        <StatCard label="Recurrentes" valor={stats.recurrentes} color="#0891B2" />
+        <StatCard label="Admins"      valor={stats.admins}      color={paleta?.primario} icon={<Shield className="w-3.5 h-3.5" />} />
       </div>
 
       {/* Búsqueda */}
@@ -61,7 +65,8 @@ export default function TabContactos() {
       {/* Lista */}
       {isLoading ? (
         <div className="flex items-center justify-center h-48 text-gray-500">
-          <div className="animate-spin w-6 h-6 border-2 border-[#c9994a] border-t-transparent rounded-full mr-2" /> Cargando...
+          <div className="animate-spin w-6 h-6 border-2 border-t-transparent rounded-full mr-2"
+            style={{ borderColor: `${paleta?.primario}40`, borderLeftColor: paleta?.primario }} /> Cargando...
         </div>
       ) : contactos.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
@@ -75,6 +80,7 @@ export default function TabContactos() {
             <TarjetaContacto
               key={c.numero_telefono}
               contacto={c}
+              paleta={paleta}
               expandido={expandido === c.numero_telefono}
               onExpandir={() => setExpandido(expandido === c.numero_telefono ? null : c.numero_telefono)}
               onActualizar={(datos) => mutActualizar.mutate({ numero: c.numero_telefono, datos })}
@@ -90,7 +96,7 @@ export default function TabContactos() {
   )
 }
 
-function TarjetaContacto({ contacto: c, expandido, onExpandir, onActualizar, onEliminar }) {
+function TarjetaContacto({ contacto: c, paleta, expandido, onExpandir, onActualizar, onEliminar }) {
   const [editandoNombre, setEditandoNombre] = useState(false)
   const [editandoNotas,  setEditandoNotas]  = useState(false)
   const [nombre, setNombre] = useState(c.nombre || '')
@@ -103,16 +109,26 @@ function TarjetaContacto({ contacto: c, expandido, onExpandir, onActualizar, onE
     <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
       {/* Fila principal */}
       <div className="flex items-center gap-3 p-4">
-        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
+          style={{
+            background: c.es_admin ? paleta?.gradiente : '#94A3B8',
+            boxShadow: c.es_admin ? `0 0 0 2px ${paleta?.primario}40` : 'none',
+          }}>
           {(c.nombre || c.numero_telefono).charAt(0).toUpperCase()}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-gray-800 text-sm truncate">{c.nombre || '(Sin nombre)'}</span>
+            {c.es_admin && (
+              <span className="text-xs px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 font-medium"
+                style={{ background: `${paleta?.primario}15`, color: paleta?.primario }}>
+                <Shield className="w-3 h-3" /> Admin
+              </span>
+            )}
             {c.total_visitas <= 1
               ? <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full shrink-0">Nuevo</span>
-              : <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full shrink-0">{c.total_visitas} visitas</span>
+              : <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full shrink-0">{c.total_visitas} visitas</span>
             }
           </div>
           <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
@@ -203,8 +219,36 @@ function TarjetaContacto({ contacto: c, expandido, onExpandir, onActualizar, onE
             <span>Última actividad: <strong>{formatearFecha(c.ultima_actividad)}</strong></span>
           </div>
 
+          {/* Acceso Admin */}
+          <div className="pt-3 border-t">
+            <div className="flex items-center justify-between p-3 rounded-xl"
+              style={{ background: c.es_admin ? `${paleta?.primario}08` : '#F8FAFC', border: `1px solid ${c.es_admin ? `${paleta?.primario}25` : '#E2E8F0'}` }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: c.es_admin ? `${paleta?.primario}15` : '#E2E8F0' }}>
+                  <Shield className="w-4 h-4" style={{ color: c.es_admin ? paleta?.primario : '#94A3B8' }} />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: '#1E293B' }}>Acceso admin por WhatsApp</p>
+                  <p className="text-xs" style={{ color: '#94A3B8' }}>
+                    {c.es_admin ? 'Puede controlar el dashboard desde WhatsApp' : 'Sin acceso de administración'}
+                  </p>
+                </div>
+              </div>
+              {/* Toggle switch */}
+              <button
+                onClick={() => onActualizar({ es_admin: !c.es_admin })}
+                className="w-11 h-6 rounded-full transition-all duration-200 relative shrink-0"
+                style={{ background: c.es_admin ? paleta?.primario : '#CBD5E1' }}
+              >
+                <span className="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
+                  style={{ transform: c.es_admin ? 'translateX(22px)' : 'translateX(4px)' }} />
+              </button>
+            </div>
+          </div>
+
           {/* Eliminar */}
-          <div className="pt-2 border-t">
+          <div className="pt-2">
             <button onClick={onEliminar} className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-600 transition-colors">
               <Trash2 className="w-3.5 h-3.5" /> Eliminar contacto
             </button>
@@ -215,11 +259,14 @@ function TarjetaContacto({ contacto: c, expandido, onExpandir, onActualizar, onE
   )
 }
 
-function StatCard({ label, valor, color }) {
+function StatCard({ label, valor, color, icon }) {
   return (
     <div className="bg-white rounded-xl border shadow-sm p-4 text-center">
-      <div className={`text-2xl font-bold ${color}`}>{valor}</div>
-      <div className="text-xs text-gray-500 mt-1">{label}</div>
+      <div className="text-2xl font-bold" style={{ color: color || '#374151' }}>{valor}</div>
+      <div className="text-xs text-gray-500 mt-1 flex items-center justify-center gap-1">
+        {icon && <span style={{ color }}>{icon}</span>}
+        {label}
+      </div>
     </div>
   )
 }

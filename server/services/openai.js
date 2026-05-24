@@ -1,9 +1,10 @@
-// Servicio de IA — Sarah, la recepcionista virtual de la clínica dental
+// Servicio de IA — Anelis, la asistente virtual de la clínica dental
 // Usa Groq (Llama 3) como proveedor gratuito, compatible con el SDK de OpenAI
 
 const OpenAI = require('openai');
 const { db, generarNumeroCotizacion } = require('../db');
 const { calcularHorariosDisponibles } = require('../utils/fechas');
+const { HERRAMIENTAS_ADMIN, ejecutarHerramientaAdmin } = require('./admin-tools');
 
 let _openai = null;
 function getOpenAI() {
@@ -418,11 +419,18 @@ Respondé *ACEPTAR* para confirmar o *RECHAZAR* para cancelar.
   }
 }
 
-async function procesarMensaje(numeroTelefono, mensajeUsuario, historial, config) {
+async function procesarMensaje(numeroTelefono, mensajeUsuario, historial, config, enviarMensajeFn) {
   const nombreClinica = config?.nombre_clinica || 'Klin';
 
-  // Obtener contexto del paciente
+  // Obtener contexto del contacto
   const contacto = db.prepare('SELECT * FROM contactos WHERE numero_telefono = ?').get(numeroTelefono);
+
+  // ── Flujo ADMIN ─────────────────────────────────────────────────────────
+  if (contacto?.es_admin === 1) {
+    return procesarMensajeAdmin(numeroTelefono, mensajeUsuario, historial, config, contacto, enviarMensajeFn);
+  }
+
+  // ── Flujo PACIENTE (sin cambios) ─────────────────────────────────────────
   const esPrimerContacto = !contacto;
   const nombrePaciente = contacto?.nombre || null;
   const totalVisitas = contacto?.total_visitas || 0;
@@ -431,7 +439,7 @@ async function procesarMensaje(numeroTelefono, mensajeUsuario, historial, config
     ? 'PACIENTE NUEVO — primera vez que contacta.'
     : `Paciente conocido: ${nombrePaciente || 'nombre no registrado'} — ${totalVisitas} visita(s) previas.`;
 
-  const systemPrompt = `Sos Sarah, asistente de ${nombreClinica}. Profesional, amable y MUY concisa.
+  const systemPrompt = `Sos Anelis, asistente de ${nombreClinica}. Profesional, amable y MUY concisa.
 
 ESTILO (obligatorio):
 - Máximo 3-4 líneas por mensaje. Sin párrafos largos.
@@ -530,6 +538,81 @@ REGLAS:
 
   console.log(`[OpenAI] Respuesta generada para ${numeroTelefono} en ${iteraciones} iteraciones`);
   return { respuesta: respuestaFinal, cotizacionId: cotizacionIdGenerado };
+}
+
+// ── Flujo ADMIN ──────────────────────────────────────────────────────────────
+
+async function procesarMensajeAdmin(numeroTelefono, mensajeUsuario, historial, config, contacto, enviarMensajeFn) {
+  const nombreClinica = config?.nombre_clinica || 'Klin';
+  const nombreAdmin = contacto?.nombre || 'Admin';
+
+  const systemPrompt = `Sos Anelis, asistente de gestión de ${nombreClinica}.
+Estás hablando con ${nombreAdmin}, un administrador autorizado.
+
+ESTILO (obligatorio):
+- Respuestas directas y ejecutivas. Sin saludos largos.
+- Listados con números o guiones cuando hay varios ítems.
+- Español rioplatense (vos, no usted).
+- Confirmá siempre cuando ejecutés una acción (✅ / ❌).
+- Si el admin pide algo, hacelo. No preguntes de más.
+
+CAPACIDADES:
+Podés consultar y modificar turnos, stats, cotizaciones, pacientes, recordatorios y configuración del bot.
+Usá las herramientas disponibles para responder con datos reales.
+
+CLÍNICA: ${nombreClinica}`;
+
+  const mensajes = [
+    { role: 'system', content: systemPrompt },
+    ...historial.map(m => ({
+      role: m.remitente === 'usuario' ? 'user' : 'assistant',
+      content: m.contenido_mensaje,
+    })),
+    { role: 'user', content: mensajeUsuario },
+  ];
+
+  let respuestaFinal = '';
+  let iteraciones = 0;
+  const MAX_ITERACIONES = 10;
+
+  while (iteraciones < MAX_ITERACIONES) {
+    iteraciones++;
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: mensajes,
+      tools: HERRAMIENTAS_ADMIN,
+      tool_choice: 'auto',
+    });
+
+    const mensaje = completion.choices[0].message;
+    mensajes.push(mensaje);
+
+    if (!mensaje.tool_calls || mensaje.tool_calls.length === 0) {
+      respuestaFinal = mensaje.content || '';
+      break;
+    }
+
+    for (const toolCall of mensaje.tool_calls) {
+      const nombre = toolCall.function.name;
+      let args;
+      try { args = JSON.parse(toolCall.function.arguments); } catch { args = {}; }
+
+      console.log(`[Admin] Herramienta: ${nombre}`, args);
+      const resultado = await ejecutarHerramientaAdmin(nombre, args, config, enviarMensajeFn);
+
+      mensajes.push({
+        role: 'tool',
+        tool_call_id: toolCall.id,
+        content: JSON.stringify(resultado),
+      });
+    }
+  }
+
+  if (!respuestaFinal) respuestaFinal = 'No pude procesar la solicitud. Intentá de nuevo.';
+
+  console.log(`[Admin] Respuesta para ${numeroTelefono} en ${iteraciones} iteraciones`);
+  return { respuesta: respuestaFinal, cotizacionId: null };
 }
 
 module.exports = { procesarMensaje };

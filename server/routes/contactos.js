@@ -62,18 +62,27 @@ router.get('/:numero', (req, res) => {
   }
 });
 
-// PATCH /api/contactos/:numero — Actualizar nombre o notas
+// PATCH /api/contactos/:numero — Actualizar nombre, notas o es_admin
 router.patch('/:numero', (req, res) => {
   try {
     const { numero } = req.params;
-    const { nombre, notas } = req.body;
+    const { nombre, notas, es_admin } = req.body;
 
-    db.prepare(`
-      UPDATE contactos SET
-        nombre = COALESCE(?, nombre),
-        notas  = COALESCE(?, notas)
-      WHERE numero_telefono = ?
-    `).run(nombre ?? null, notas ?? null, numero);
+    // es_admin es booleano/número — lo tratamos explícitamente
+    const sets = [];
+    const params = [];
+
+    if (nombre !== undefined) { sets.push('nombre = ?'); params.push(nombre ?? null); }
+    if (notas  !== undefined) { sets.push('notas = ?');  params.push(notas  ?? null); }
+    if (es_admin !== undefined) {
+      sets.push('es_admin = ?');
+      params.push(es_admin ? 1 : 0);
+    }
+
+    if (sets.length === 0) return res.json(db.prepare('SELECT * FROM contactos WHERE numero_telefono = ?').get(numero));
+
+    params.push(numero);
+    db.prepare(`UPDATE contactos SET ${sets.join(', ')} WHERE numero_telefono = ?`).run(...params);
 
     res.json(db.prepare('SELECT * FROM contactos WHERE numero_telefono = ?').get(numero));
   } catch (error) {

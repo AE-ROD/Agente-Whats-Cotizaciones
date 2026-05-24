@@ -115,7 +115,7 @@ async function manejarMensaje(message) {
   `).all(numero).reverse();
 
   console.log(`[${timestamp}] [WhatsApp] Llamando a OpenAI para ${numero}`);
-  const { respuesta: respuestaIA, cotizacionId } = await procesarMensaje(numero, mensaje, historial.slice(0, -1), config);
+  const { respuesta: respuestaIA, cotizacionId } = await procesarMensaje(numero, mensaje, historial.slice(0, -1), config, enviarMensaje);
 
   db.prepare(`
     INSERT INTO mensajes_whatsapp (numero_telefono, contenido_mensaje, remitente, tipo_mensaje, procesado)
