@@ -9,10 +9,11 @@ import TabTurnos from '@/components/TabTurnos'
 import TabCotizaciones from '@/components/TabCotizaciones'
 import TabContactos from '@/components/TabContactos'
 import TabRecordatorios from '@/components/TabRecordatorios'
+import TabServicios from '@/components/TabServicios'
 import TabConfiguracion from '@/components/TabConfiguracion'
 import {
   LayoutDashboard, MessageCircle, Calendar, FileText,
-  Users, Bell, Settings, Home, Wifi, WifiOff,
+  Users, Bell, Settings, Home, Wifi, WifiOff, Package,
 } from 'lucide-react'
 
 // ── Hook de paleta dinámica por hora ────────────────────────────────────────
@@ -50,6 +51,10 @@ export function usePaleta() {
 export const PaletaContext = createContext(null)
 export function usePaletaCtx() { return useContext(PaletaContext) }
 
+// Context de navegación — permite que TabInicio navegue a otros tabs
+export const NavContext = createContext(null)
+export function useNavCtx() { return useContext(NavContext) }
+
 // ── Navegación ───────────────────────────────────────────────────────────────
 const NAV = [
   { key: 'inicio',        label: 'Inicio',        icon: LayoutDashboard },
@@ -58,6 +63,7 @@ const NAV = [
   { key: 'cotizaciones',  label: 'Cotizaciones',   icon: FileText        },
   { key: 'contactos',     label: 'Contactos',      icon: Users           },
   { key: 'recordatorios', label: 'Recordatorios',  icon: Bell            },
+  { key: 'servicios',     label: 'Servicios',      icon: Package         },
   { key: 'configuracion', label: 'Configuración',  icon: Settings        },
 ]
 
@@ -68,6 +74,7 @@ const TABS = {
   cotizaciones:  <TabCotizaciones />,
   contactos:     <TabContactos />,
   recordatorios: <TabRecordatorios />,
+  servicios:     <TabServicios />,
   configuracion: <TabConfiguracion />,
 }
 
@@ -89,6 +96,7 @@ export default function Dashboard() {
   })
 
   return (
+    <NavContext.Provider value={{ setActivo }}>
     <PaletaContext.Provider value={paleta}>
       <div className="min-h-screen flex flex-col" style={{ background: BG, fontFamily: "'Inter', sans-serif" }}>
 
@@ -166,7 +174,7 @@ export default function Dashboard() {
 
         {/* ── Contenido ─────────────────────────────────────────────── */}
         <main className="flex-1 px-4 md:px-8 py-6 pb-24 md:pb-8">
-          <div className="max-w-5xl mx-auto">
+          <div className={activo === 'inicio' ? 'w-full' : 'max-w-4xl mx-auto'}>
             {TABS[activo]}
           </div>
         </main>
@@ -194,5 +202,6 @@ export default function Dashboard() {
 
       </div>
     </PaletaContext.Provider>
+    </NavContext.Provider>
   )
 }
