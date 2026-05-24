@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { usePaletaCtx } from '@/pages/Dashboard'
 import { Calendar, Clock, User, Phone, Plus, X } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -25,6 +26,7 @@ const ESTADOS_COLORES = {
 const FORM_INICIAL = { nombre_paciente: '', numero_telefono: '', fecha_turno: '', tipo_turno: '', notas: '' }
 
 export default function TabTurnos() {
+  const paleta = usePaletaCtx()
   const [filtroEstado,  setFiltroEstado]  = useState('todos')
   const [modalAbierto,  setModalAbierto]  = useState(false)
   const [form,          setForm]          = useState(FORM_INICIAL)
@@ -105,7 +107,7 @@ export default function TabTurnos() {
             </div>
             <div className="flex gap-2 mt-5">
               <Button variant="outline" className="flex-1" onClick={() => { setModalAbierto(false); setForm(FORM_INICIAL) }}>Cancelar</Button>
-              <Button className="flex-1 bg-[#c9994a] hover:bg-[#b8873a]" onClick={handleCrear} disabled={mutCrear.isPending}>
+              <Button className="flex-1" style={{ background: paleta?.primario }} onClick={handleCrear} disabled={mutCrear.isPending}>
                 {mutCrear.isPending ? 'Guardando...' : 'Guardar turno'}
               </Button>
             </div>
@@ -123,7 +125,7 @@ export default function TabTurnos() {
 
       {/* Controles */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-        <Button onClick={() => setModalAbierto(true)} className="bg-[#c9994a] hover:bg-[#b8873a] w-full sm:w-auto gap-1.5">
+        <Button onClick={() => setModalAbierto(true)} className="w-full sm:w-auto gap-1.5" style={{ background: paleta?.primario }}>
           <Plus className="w-4 h-4" /> Nuevo turno
         </Button>
         <Select value={filtroEstado} onValueChange={setFiltroEstado}>
@@ -142,7 +144,7 @@ export default function TabTurnos() {
       {/* Lista */}
       {isLoading ? (
         <div className="flex items-center justify-center h-48 text-gray-500">
-          <div className="animate-spin w-6 h-6 border-2 border-[#c9994a] border-t-transparent rounded-full mr-2" />
+          <div className="animate-spin w-6 h-6 border-2 border-t-transparent rounded-full mr-2" style={{ borderColor: `${paleta?.primario}40`, borderTopColor: 'transparent', borderLeftColor: paleta?.primario }} />
           Cargando...
         </div>
       ) : turnosFiltrados.length === 0 ? (
@@ -175,7 +177,7 @@ export default function TabTurnos() {
                       <span>{turno.numero_telefono}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-xs text-[#c9994a]">
+                  <div className="flex items-center gap-2 text-xs" style={{ color: paleta?.primario }}>
                     <Clock className="w-3 h-3 shrink-0" />
                     <span>{formatearFecha(turno.fecha_turno)}</span>
                   </div>

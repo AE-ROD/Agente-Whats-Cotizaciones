@@ -1,0 +1,85 @@
+<h2>Hero adaptable según la hora del día</h2>
+<p class="subtitle">El banner cambia de tono automáticamente — azul lavanda claro de mañana, medio al atardecer, oscuro de noche.</p>
+
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:4px;">
+
+  <!-- MAÑANA -->
+  <div>
+    <p class="label" style="margin-bottom:8px;">⛅ Buenos días (6:00 – 12:59)</p>
+    <div style="background:linear-gradient(135deg,#6B7FC4 0%,#8E9FD8 50%,#ADBCEA 100%);border-radius:14px;padding:22px 28px;color:#fff;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.08);"></div>
+      <div style="position:absolute;bottom:-20px;left:35%;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
+      <div style="position:relative;">
+        <p style="font-size:11px;color:rgba(255,255,255,0.75);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">⛅ Buenos días</p>
+        <p style="font-size:26px;font-weight:700;font-family:Georgia,serif;font-style:italic;color:#fff;line-height:1.1;margin-bottom:4px;">Doctora Franyelis</p>
+        <p style="font-size:10px;color:rgba(255,255,255,0.6);letter-spacing:2px;text-transform:uppercase;">OD. FRANYELIS MORENO · ODONTÓLOGO GENERAL</p>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <div style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:5px 14px;font-size:10px;color:#fff;">📅 3 turnos hoy</div>
+          <div style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:5px 14px;font-size:10px;color:#fff;">📋 2 pendientes</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <div style="width:24px;height:8px;border-radius:4px;background:#6B7FC4;"></div>
+      <div style="width:24px;height:8px;border-radius:4px;background:#8E9FD8;"></div>
+      <div style="width:24px;height:8px;border-radius:4px;background:#ADBCEA;"></div>
+      <span style="font-size:10px;color:#6b7280;margin-left:4px;">#6B7FC4 → #ADBCEA — lavanda claro y fresco</span>
+    </div>
+  </div>
+
+  <!-- TARDE -->
+  <div>
+    <p class="label" style="margin-bottom:8px;">☀️ Buenas tardes (13:00 – 19:59)</p>
+    <div style="background:linear-gradient(135deg,#4A5A9C 0%,#6070B8 50%,#7885C8 100%);border-radius:14px;padding:22px 28px;color:#fff;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);"></div>
+      <div style="position:absolute;bottom:-20px;left:35%;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.04);"></div>
+      <div style="position:relative;">
+        <p style="font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">☀️ Buenas tardes</p>
+        <p style="font-size:26px;font-weight:700;font-family:Georgia,serif;font-style:italic;color:#fff;line-height:1.1;margin-bottom:4px;">Doctora Franyelis</p>
+        <p style="font-size:10px;color:rgba(255,255,255,0.55);letter-spacing:2px;text-transform:uppercase;">OD. FRANYELIS MORENO · ODONTÓLOGO GENERAL</p>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <div style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:5px 14px;font-size:10px;color:#fff;">📅 3 turnos hoy</div>
+          <div style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:5px 14px;font-size:10px;color:#fff;">📋 2 pendientes</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <div style="width:24px;height:8px;border-radius:4px;background:#4A5A9C;"></div>
+      <div style="width:24px;height:8px;border-radius:4px;background:#6070B8;"></div>
+      <div style="width:24px;height:8px;border-radius:4px;background:#7885C8;"></div>
+      <span style="font-size:10px;color:#6b7280;margin-left:4px;">#4A5A9C → #7885C8 — lavanda medio, más serio</span>
+    </div>
+  </div>
+
+  <!-- NOCHE -->
+  <div>
+    <p class="label" style="margin-bottom:8px;">🌙 Buenas noches (20:00 – 5:59)</p>
+    <div style="background:linear-gradient(135deg,#251D4B 0%,#352870 50%,#453590 100%);border-radius:14px;padding:22px 28px;color:#fff;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(200,213,245,0.06);"></div>
+      <div style="position:absolute;bottom:-20px;left:35%;width:90px;height:90px;border-radius:50%;background:rgba(204,169,232,0.05);"></div>
+      <div style="position:relative;">
+        <p style="font-size:11px;color:#C8D5F5;letter-spacing:1.5px;text-transform:uppercase;opacity:.75;margin-bottom:6px;">🌙 Buenas noches</p>
+        <p style="font-size:26px;font-weight:700;font-family:Georgia,serif;font-style:italic;color:#fff;line-height:1.1;margin-bottom:4px;">Doctora Franyelis</p>
+        <p style="font-size:10px;color:rgba(200,213,245,0.5);letter-spacing:2px;text-transform:uppercase;">OD. FRANYELIS MORENO · ODONTÓLOGO GENERAL</p>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <div style="background:rgba(200,213,245,0.15);border:1px solid rgba(200,213,245,0.2);border-radius:20px;padding:5px 14px;font-size:10px;color:#C8D5F5;">📅 3 turnos hoy</div>
+          <div style="background:rgba(204,169,232,0.15);border:1px solid rgba(204,169,232,0.2);border-radius:20px;padding:5px 14px;font-size:10px;color:#CCA9E8;">📋 2 pendientes</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <div style="width:24px;height:8px;border-radius:4px;background:#251D4B;"></div>
+      <div style="width:24px;height:8px;border-radius:4px;background:#352870;"></div>
+      <div style="width:24px;height:8px;border-radius:4px;background:#453590;"></div>
+      <span style="font-size:10px;color:#6b7280;margin-left:4px;">#251D4B → #453590 — púrpura profundo de noche</span>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;padding:14px 18px;background:#F8F7FF;border-radius:12px;border:1px solid #C8D5F5;font-family:sans-serif;">
+  <p style="font-size:12px;font-weight:600;color:#251D4B;margin-bottom:6px;">¿Cómo funciona?</p>
+  <p style="font-size:11px;color:#6b7280;line-height:1.6;">El color cambia <strong>automáticamente</strong> según la hora del dispositivo. El resto del dashboard (pills, cards, stats) mantiene siempre los mismos colores — solo el hero banner cambia de tono.</p>
+</div>
+
+<p class="subtitle" style="margin-top:14px;">¿Te gusta esta dirección? ¿Querés ajustar alguno de los tres tonos?</p>

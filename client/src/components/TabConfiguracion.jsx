@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { usePaletaCtx } from '@/pages/Dashboard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,6 +10,7 @@ import { toast } from '@/hooks/use-toast'
 import { Save, Settings, Copy, Check, Edit2, Wifi, WifiOff, Bot } from 'lucide-react'
 
 export default function TabConfiguracion() {
+  const paleta = usePaletaCtx()
   const queryClient = useQueryClient()
   const [form, setForm] = useState({})
   const [copiado, setCopiado] = useState(false)
@@ -87,7 +89,7 @@ export default function TabConfiguracion() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-48 text-gray-500">
-        <div className="animate-spin w-6 h-6 border-2 border-[#c9994a] border-t-transparent rounded-full mr-2" />
+        <div className="animate-spin w-6 h-6 border-2 border-t-transparent rounded-full mr-2" style={{ borderColor: `${paleta?.primario}40`, borderLeftColor: paleta?.primario }} />
         Cargando configuración...
       </div>
     )
@@ -99,7 +101,7 @@ export default function TabConfiguracion() {
       {/* Panel del Agente WhatsApp */}
       <div className="bg-white rounded-lg border shadow-sm p-6">
         <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <Bot className="w-5 h-5 text-[#063740]" /> Agente WhatsApp
+          <Bot className="w-5 h-5" style={{ color: paleta?.primario }} /> Agente WhatsApp
         </h2>
 
         {/* Estado de conexión */}
@@ -157,7 +159,8 @@ export default function TabConfiguracion() {
             <button
               onClick={() => mutacionBot.mutate(!waEstado?.bot_activo)}
               disabled={mutacionBot.isPending}
-              className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${waEstado?.bot_activo ? 'bg-indigo-600' : 'bg-gray-300'}`}
+              className="w-12 h-6 rounded-full transition-colors relative shrink-0"
+              style={{ background: waEstado?.bot_activo ? paleta?.primario : '#D1D5DB' }}
             >
               <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${waEstado?.bot_activo ? 'translate-x-7' : 'translate-x-1'}`} />
             </button>
@@ -168,7 +171,7 @@ export default function TabConfiguracion() {
       {/* Config clínica */}
       <div className="bg-white rounded-lg border shadow-sm p-6">
         <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <Settings className="w-5 h-5 text-[#063740]" /> Información de la Clínica
+          <Settings className="w-5 h-5" style={{ color: paleta?.primario }} /> Información de la Clínica
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -223,7 +226,7 @@ export default function TabConfiguracion() {
           <Button
             onClick={() => mutacionConfig.mutate(form)}
             disabled={mutacionConfig.isPending}
-            className="bg-[#063740] hover:bg-[#063740]/90"
+            style={{ background: paleta?.primario }}
           >
             <Save className="w-4 h-4 mr-1.5" />
             {mutacionConfig.isPending ? 'Guardando...' : 'Guardar cambios'}
@@ -246,12 +249,12 @@ export default function TabConfiguracion() {
           <div className="space-y-6">
             {Object.entries(catalogoPorCategoria).map(([categoria, servicios]) => (
               <div key={categoria}>
-                <h3 className="text-xs font-bold text-[#063740] uppercase tracking-wider mb-2 pb-1 border-b">
+                <h3 className="text-xs font-bold uppercase tracking-wider mb-2 pb-1 border-b" style={{ color: paleta?.primario }}>
                   {categoria}
                 </h3>
                 <div className="space-y-1">
                   {servicios.map(s => (
-                    <FilaServicio key={s.id} servicio={s} onActualizar={(datos) => mutacionCatalogo.mutate({ id: s.id, datos })} />
+                    <FilaServicio key={s.id} servicio={s} paleta={paleta} onActualizar={(datos) => mutacionCatalogo.mutate({ id: s.id, datos })} />
                   ))}
                 </div>
               </div>
@@ -263,7 +266,7 @@ export default function TabConfiguracion() {
   )
 }
 
-function FilaServicio({ servicio, onActualizar }) {
+function FilaServicio({ servicio, paleta, onActualizar }) {
   const [editando, setEditando] = useState(false)
   const [precio, setPrecio] = useState(String(servicio.precio))
 
@@ -301,7 +304,7 @@ function FilaServicio({ servicio, onActualizar }) {
               onKeyDown={e => { if (e.key === 'Enter') guardarPrecio(); if (e.key === 'Escape') setEditando(false) }}
               autoFocus
             />
-            <Button size="sm" className="h-7 px-2 text-xs bg-[#063740]" onClick={guardarPrecio}>
+            <Button size="sm" className="h-7 px-2 text-xs" style={{ background: paleta?.primario }} onClick={guardarPrecio}>
               <Check className="w-3 h-3" />
             </Button>
           </>
@@ -317,7 +320,8 @@ function FilaServicio({ servicio, onActualizar }) {
         <button
           onClick={() => onActualizar({ activo: !servicio.activo })}
           title={servicio.activo ? 'Desactivar' : 'Activar'}
-          className={`w-8 h-5 rounded-full transition-colors relative ${servicio.activo ? 'bg-[#063740]' : 'bg-gray-300'}`}
+          className="w-8 h-5 rounded-full transition-colors relative"
+          style={{ background: servicio.activo ? paleta?.primario : '#D1D5DB' }}
         >
           <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${servicio.activo ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
         </button>

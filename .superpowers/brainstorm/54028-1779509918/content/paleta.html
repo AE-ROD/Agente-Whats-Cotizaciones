@@ -1,0 +1,159 @@
+<h2>¿Qué paleta de colores preferís?</h2>
+<p class="subtitle">Todas usan el layout C (hero banner + pills). Cambia la sensación de la marca.</p>
+
+<div class="cards">
+
+  <!-- Paleta 1: Blanco puro + Salvia profundo -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:8px;">
+      <div style="background:#f9fafb;padding:12px;display:flex;flex-direction:column;gap:6px;">
+        <!-- Hero -->
+        <div style="background:linear-gradient(135deg,#3d6b52 0%,#5a8a6e 100%);border-radius:10px;padding:12px 14px;color:#fff;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+          <div style="font-size:8px;opacity:0.75;font-family:sans-serif;letter-spacing:1px;">⛅ BUENOS DÍAS</div>
+          <div style="font-size:15px;font-weight:700;font-family:Georgia,serif;font-style:italic;margin-top:2px;">Doctora Franyelis</div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <div style="background:rgba(255,255,255,0.18);border-radius:20px;padding:3px 8px;font-size:7px;font-family:sans-serif;">3 turnos hoy</div>
+            <div style="background:rgba(255,255,255,0.18);border-radius:20px;padding:3px 8px;font-size:7px;font-family:sans-serif;">2 pendientes</div>
+          </div>
+        </div>
+        <!-- Pills -->
+        <div style="display:flex;gap:4px;">
+          <div style="background:#3d6b52;color:#fff;border-radius:20px;padding:4px 10px;font-size:7px;font-weight:700;font-family:sans-serif;">● Inicio</div>
+          <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:20px;padding:4px 10px;font-size:7px;color:#6b7280;font-family:sans-serif;">Mensajes</div>
+          <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:20px;padding:4px 10px;font-size:7px;color:#6b7280;font-family:sans-serif;">Turnos</div>
+          <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:20px;padding:4px 10px;font-size:7px;color:#6b7280;font-family:sans-serif;">Cotiz.</div>
+        </div>
+        <!-- Stats -->
+        <div style="display:flex;gap:5px;">
+          <div style="flex:1;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:8px;border-top:3px solid #3d6b52;">
+            <div style="font-size:7px;color:#9ca3af;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Pacientes</div>
+            <div style="font-size:16px;font-weight:700;color:#111827;font-family:sans-serif;">48</div>
+          </div>
+          <div style="flex:1;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:8px;border-top:3px solid #e5a0a8;">
+            <div style="font-size:7px;color:#9ca3af;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Ingresos</div>
+            <div style="font-size:16px;font-weight:700;color:#111827;font-family:sans-serif;">$320</div>
+          </div>
+          <div style="flex:1;background:#fff;border-radius:8px;border:1px solid #e5e7eb;padding:8px;border-top:3px solid #3d6b52;">
+            <div style="font-size:7px;color:#9ca3af;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Turnos</div>
+            <div style="font-size:16px;font-weight:700;color:#111827;font-family:sans-serif;">3</div>
+          </div>
+        </div>
+      </div>
+      <!-- Franja de colores -->
+      <div style="display:flex;height:18px;">
+        <div style="flex:3;background:#3d6b52;"></div>
+        <div style="flex:1;background:#5a8a6e;"></div>
+        <div style="flex:1;background:#e5a0a8;"></div>
+        <div style="flex:1;background:#f9fafb;border:1px solid #e5e7eb;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Verde profundo + Blanco nítido</h3>
+      <p>Verde salvia más oscuro y saturado. Fondo blanco puro. Rose como acento secundario. Profesional, médico, moderno.</p>
+    </div>
+  </div>
+
+  <!-- Paleta 2: Champagne + Blanco cálido -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:8px;">
+      <div style="background:#fdfaf7;padding:12px;display:flex;flex-direction:column;gap:6px;">
+        <!-- Hero -->
+        <div style="background:linear-gradient(135deg,#b8873a 0%,#d4a857 100%);border-radius:10px;padding:12px 14px;color:#fff;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+          <div style="font-size:8px;opacity:0.75;font-family:sans-serif;letter-spacing:1px;">⛅ BUENOS DÍAS</div>
+          <div style="font-size:15px;font-weight:700;font-family:Georgia,serif;font-style:italic;margin-top:2px;">Doctora Franyelis</div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <div style="background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 8px;font-size:7px;font-family:sans-serif;">3 turnos hoy</div>
+            <div style="background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 8px;font-size:7px;font-family:sans-serif;">2 pendientes</div>
+          </div>
+        </div>
+        <!-- Pills -->
+        <div style="display:flex;gap:4px;">
+          <div style="background:#b8873a;color:#fff;border-radius:20px;padding:4px 10px;font-size:7px;font-weight:700;font-family:sans-serif;">● Inicio</div>
+          <div style="background:#fff;border:1.5px solid #ede5d8;border-radius:20px;padding:4px 10px;font-size:7px;color:#9ca3af;font-family:sans-serif;">Mensajes</div>
+          <div style="background:#fff;border:1.5px solid #ede5d8;border-radius:20px;padding:4px 10px;font-size:7px;color:#9ca3af;font-family:sans-serif;">Turnos</div>
+          <div style="background:#fff;border:1.5px solid #ede5d8;border-radius:20px;padding:4px 10px;font-size:7px;color:#9ca3af;font-family:sans-serif;">Cotiz.</div>
+        </div>
+        <!-- Stats -->
+        <div style="display:flex;gap:5px;">
+          <div style="flex:1;background:#fff;border-radius:8px;border:1px solid #ede5d8;padding:8px;border-left:3px solid #b8873a;">
+            <div style="font-size:7px;color:#b8a082;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Pacientes</div>
+            <div style="font-size:16px;font-weight:700;color:#2a1f0e;font-family:sans-serif;">48</div>
+          </div>
+          <div style="flex:1;background:#fff;border-radius:8px;border:1px solid #ede5d8;padding:8px;border-left:3px solid #b8873a;">
+            <div style="font-size:7px;color:#b8a082;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Ingresos</div>
+            <div style="font-size:16px;font-weight:700;color:#2a1f0e;font-family:sans-serif;">$320</div>
+          </div>
+          <div style="flex:1;background:#fdf5e8;border-radius:8px;border:1px solid #ede5d8;padding:8px;border-left:3px solid #b8873a;">
+            <div style="font-size:7px;color:#b8a082;font-family:sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Turnos</div>
+            <div style="font-size:16px;font-weight:700;color:#2a1f0e;font-family:sans-serif;">3</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;height:18px;">
+        <div style="flex:3;background:#b8873a;"></div>
+        <div style="flex:1;background:#d4a857;"></div>
+        <div style="flex:1;background:#fdf5e8;border:1px solid #ede5d8;"></div>
+        <div style="flex:1;background:#fff;border:1px solid #ede5d8;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Champagne dorado + Crema cálida</h3>
+      <p>Dorado champagne como protagonista. Fondo crema cálido. Muy fiel a la estética del flyer de marca. Elegante y personal.</p>
+    </div>
+  </div>
+
+  <!-- Paleta 3: Duotono salvia+blush equilibrado -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:8px;">
+      <div style="background:#fafafa;padding:12px;display:flex;flex-direction:column;gap:6px;">
+        <!-- Hero duotono -->
+        <div style="background:linear-gradient(135deg,#5a8a6e 0%,#8aaa94 60%,#c97b84 100%);border-radius:10px;padding:12px 14px;color:#fff;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-15px;right:-15px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+          <div style="font-size:8px;opacity:0.8;font-family:sans-serif;letter-spacing:1px;">⛅ BUENOS DÍAS</div>
+          <div style="font-size:15px;font-weight:700;font-family:Georgia,serif;font-style:italic;margin-top:2px;">Doctora Franyelis</div>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <div style="background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 8px;font-size:7px;font-family:sans-serif;">3 turnos hoy</div>
+            <div style="background:rgba(255,255,255,0.2);border-radius:20px;padding:3px 8px;font-size:7px;font-family:sans-serif;">2 pendientes</div>
+          </div>
+        </div>
+        <!-- Pills -->
+        <div style="display:flex;gap:4px;">
+          <div style="background:#5a8a6e;color:#fff;border-radius:20px;padding:4px 10px;font-size:7px;font-weight:700;font-family:sans-serif;">● Inicio</div>
+          <div style="background:#fff;border:1.5px solid #e8eee9;border-radius:20px;padding:4px 10px;font-size:7px;color:#6b7280;font-family:sans-serif;">Mensajes</div>
+          <div style="background:#fff;border:1.5px solid #e8eee9;border-radius:20px;padding:4px 10px;font-size:7px;color:#6b7280;font-family:sans-serif;">Turnos</div>
+          <div style="background:#fdf0f2;border:1.5px solid #f5c5cc;border-radius:20px;padding:4px 10px;font-size:7px;color:#c97b84;font-weight:600;font-family:sans-serif;">Cotiz. ●</div>
+        </div>
+        <!-- Stats mixtos -->
+        <div style="display:flex;gap:5px;">
+          <div style="flex:1;background:#edf5f0;border-radius:8px;padding:8px;border:1px solid #d4e8dc;">
+            <div style="font-size:7px;color:#5a8a6e;font-family:sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Pacientes</div>
+            <div style="font-size:16px;font-weight:700;color:#1f2937;font-family:sans-serif;">48</div>
+          </div>
+          <div style="flex:1;background:#fdf0f2;border-radius:8px;padding:8px;border:1px solid #f5c5cc;">
+            <div style="font-size:7px;color:#c97b84;font-family:sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Ingresos</div>
+            <div style="font-size:16px;font-weight:700;color:#1f2937;font-family:sans-serif;">$320</div>
+          </div>
+          <div style="flex:1;background:#edf5f0;border-radius:8px;padding:8px;border:1px solid #d4e8dc;">
+            <div style="font-size:7px;color:#5a8a6e;font-family:sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Turnos</div>
+            <div style="font-size:16px;font-weight:700;color:#1f2937;font-family:sans-serif;">3</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;height:18px;">
+        <div style="flex:2;background:#5a8a6e;"></div>
+        <div style="flex:1;background:#8aaa94;"></div>
+        <div style="flex:1;background:#c97b84;"></div>
+        <div style="flex:1;background:#fafafa;border:1px solid #e5e7eb;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Duotono salvia→blush</h3>
+      <p>Gradiente verde-a-rosa en el hero. Cards de stats en colores tenues alternados. Identidad dual que usa ambos colores de marca en equilibrio.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Hacé click en la que más te represente y contame en el chat.</p>
